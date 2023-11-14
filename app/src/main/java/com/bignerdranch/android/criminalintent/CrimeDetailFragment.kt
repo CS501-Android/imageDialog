@@ -71,6 +71,10 @@ class CrimeDetailFragment : Fragment() {
         return binding.root
     }
 
+    companion object {
+        private const val DIALOG_PICTURE = "DialogPicture"
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -116,6 +120,17 @@ class CrimeDetailFragment : Fragment() {
             crimeCamera.isEnabled = canResolveIntent(captureImageIntent)
         }
 
+        binding.crimePhoto.setOnClickListener {
+            crimeDetailViewModel.crime.value?.photoFileName?.let { photoFileName ->
+                val photoFile = File(requireContext().applicationContext.filesDir, photoFileName)
+                if (photoFile.exists()) {
+                    ZoomedPhotoDialogFragment.newInstance(photoFile).apply {
+                        show(this@CrimeDetailFragment.parentFragmentManager, DIALOG_PICTURE)
+                    }
+                }
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 crimeDetailViewModel.crime.collect { crime ->
@@ -147,12 +162,6 @@ class CrimeDetailFragment : Fragment() {
             crimeDate.setOnClickListener {
                 findNavController().navigate(
                     CrimeDetailFragmentDirections.selectDate(crime.date)
-                )
-            }
-
-            crimePhoto.setOnClickListener {
-                findNavController().navigate(
-                    CrimeDetailFragmentDirections.zoomPhoto()
                 )
             }
 
